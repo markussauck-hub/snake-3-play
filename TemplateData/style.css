@@ -7,6 +7,7 @@
   --cyan: #00f0ff;
   --muted: #8ab4f8;
   --bar-h: 56px;
+  --info-h: 38px;
 }
 
 * { box-sizing: border-box; }
@@ -95,10 +96,62 @@ body {
 #ls-home { justify-self: start; }
 #ls-fullscreen { justify-self: end; }
 
+/* ---------- Info-Leiste (Tasten + Musik) ---------- */
+#ls-info {
+  height: var(--info-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  background: rgba(6, 14, 30, 0.7);
+  border-bottom: 1px solid rgba(0, 162, 255, 0.18);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+#ls-keys { display: flex; gap: 18px; margin: 0; padding: 0; list-style: none; overflow: hidden; }
+#ls-keys li { display: flex; align-items: center; gap: 3px; }
+kbd {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 5px;
+  font: 600 10.5px/16px "Chakra Petch", sans-serif;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(180deg, #1e528e, #0c2b52);
+  border: 1px solid #3882d4;
+  border-radius: 5px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+#ls-music { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.ls-music-label { font-size: 10.5px; letter-spacing: 2px; margin-right: 4px; }
+#ls-music button {
+  font: 600 10.5px/1 "Chakra Petch", sans-serif;
+  letter-spacing: 1px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid rgba(56, 130, 212, 0.5);
+  border-radius: 9999px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+#ls-music button:hover:not(:disabled) { color: #fff; border-color: var(--cyan); }
+#ls-music button[aria-pressed="true"] {
+  color: #fff;
+  background: linear-gradient(180deg, #008ba3, #004b59);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+#ls-music button:disabled { opacity: 0.4; cursor: default; }
+#ls-music button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+
 /* ---------- Spielfläche ---------- */
 #unity-container {
   position: relative;
-  height: calc(100% - var(--bar-h));
+  height: calc(100% - var(--bar-h) - var(--info-h));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,8 +200,13 @@ body {
 .ls-banner--error { border-color: #ff4d5e; color: #ffb3ba; }
 
 /* ---------- Schmale Bildschirme / Mobil ---------- */
+@media (max-width: 900px) {
+  #ls-keys li:nth-child(n+4) { display: none; }
+}
 @media (max-width: 640px) {
   :root { --bar-h: 48px; }
+  #ls-keys { display: none; }              /* Handy: keine Tastatur */
+  #ls-info { justify-content: center; }
   .ls-label { display: none; }
   .ls-btn { padding: 8px 12px; }
   .ls-name { font-size: 16px; letter-spacing: 2px; }

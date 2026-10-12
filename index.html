@@ -13,10 +13,27 @@
       <a id="ls-home" class="ls-btn" href="https://lincolnsoft.de/" title="Zurück zur Lincolnsoft Homestation"><span class="ls-ico">⌂</span><span class="ls-label">BACK TO HOMESTATION</span></a>
       <div id="ls-title">
         <span class="ls-name">Snake 3</span>
-        <span class="ls-version">ALPHA 0.6.1</span>
+        <span class="ls-version">ALPHA 0.6.2</span>
       </div>
       <button id="ls-fullscreen" class="ls-btn" type="button" title="Vollbild"><span class="ls-ico">⛶</span><span class="ls-label">VOLLBILD</span></button>
     </header>
+
+    <!-- Info-Leiste: Tastenbelegung links, Musik-Umschaltung rechts -->
+    <nav id="ls-info" aria-label="Steuerung">
+      <ul id="ls-keys">
+        <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> Lenken</li>
+        <li><kbd>Esc</kbd> / <kbd>P</kbd> Pause</li>
+        <li><kbd>R</kbd> Neustart</li>
+        <li><kbd>M</kbd> Musik</li>
+        <li><kbd>L</kbd> Bestenliste</li>
+      </ul>
+      <div id="ls-music" role="group" aria-label="Musik">
+        <span class="ls-music-label">♪ MUSIK</span>
+        <button type="button" data-style="Techno" data-idx="0" disabled>TECHNO</button>
+        <button type="button" data-style="Metal" data-idx="1" disabled>METAL</button>
+        <button type="button" data-style="Off" data-idx="2" disabled>AUS</button>
+      </div>
+    </nav>
 
     <main id="unity-container">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
@@ -29,6 +46,21 @@
     </main>
 
     <script>
+      // ---- Musik-Umschaltung: Seite → Spiel per SendMessage, Spiel → Seite per lsOnMusicStyle (Snake3Web.jslib)
+      var unityRef = null;
+      var musicButtons = document.querySelectorAll("#ls-music button");
+      window.lsOnMusicStyle = function (idx) {
+        musicButtons.forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.idx === idx)); });
+      };
+      musicButtons.forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (!unityRef) return;
+          unityRef.SendMessage("Music", "SetStyleFromWeb", b.dataset.style);
+          window.lsOnMusicStyle(+b.dataset.idx);   // sofort anzeigen, das Spiel bestätigt per Callback
+          canvas.focus();                           // Tastatur bleibt beim Spiel
+        });
+      });
+
       // Auf lincolnsoft.de relativ zur Startseite, sonst (GitHub Pages / itch.io) absolut.
       if (/(^|\.)lincolnsoft\.de$/.test(location.hostname)) document.getElementById("ls-home").href = "/";
 
@@ -73,7 +105,7 @@
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Snake 3",
-        productVersion: "0.6.1",
+        productVersion: "0.6.2",
         showBanner: unityShowBanner,
       };
 
@@ -93,6 +125,8 @@
         }).then(function (unityInstance) {
           document.querySelector("#unity-loading-bar").style.display = "none";
           document.querySelector("#ls-fullscreen").onclick = function () { unityInstance.SetFullscreen(1); };
+          unityRef = unityInstance;
+          musicButtons.forEach(function (b) { b.disabled = false; });
           canvas.focus();
         }).catch(function (message) {
           unityShowBanner(String(message), "error");
